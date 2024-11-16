@@ -71,7 +71,7 @@ class UploadDataView(generics.GenericAPIView):
             health_measurement_data[key] = value
 
         try:
-            health_measurement_data["steps"] = int(steps)
+            health_measurement_data["steps"] = int(str(steps))
         except (ValueError, TypeError):
             error = {"detail": "Invalid value"}
             return Response(data=error, status=status.HTTP_400_BAD_REQUEST)

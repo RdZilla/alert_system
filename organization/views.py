@@ -8,7 +8,16 @@ from organization.serializers import EmployeeSerializer, EmployeesListSerializer
 
 
 class EmployeesView(generics.ListCreateAPIView):
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.filter(
+
+    ).exclude(
+        is_staff=True,
+        is_superuser=True
+    ).order_by(
+        "current_status"
+    ).order_by(
+        "last_name"
+    )
     serializer_class = EmployeesListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -35,6 +44,7 @@ class EmployeesView(generics.ListCreateAPIView):
                     "middle_name": "Maria",
                     "birth_date": "1898-06-11",
                     "gender": "MALE",
+                    "current_status": "2_NORMAL",
                     "phone_number": "+7(930) 123-45-67",
                     "position": "writer",
                     "username": "erich_remarque",

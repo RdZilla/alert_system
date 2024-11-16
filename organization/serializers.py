@@ -12,6 +12,7 @@ class EmployeesListSerializer(serializers.Serializer):
     gender = serializers.CharField()
     phone_number = serializers.CharField()
     position = serializers.CharField()
+    current_status = serializers.CharField()
 
     systolic_pressure = serializers.SerializerMethodField()
     diastolic_pressure = serializers.SerializerMethodField()
