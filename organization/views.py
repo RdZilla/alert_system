@@ -1,4 +1,5 @@
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from django.contrib.postgres.search import SearchVector, SearchQuery
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from rest_framework import generics, status, permissions
 
 from alert_system.statuses import SwaggerStatuses
@@ -8,9 +9,7 @@ from organization.serializers import EmployeeSerializer, EmployeesListSerializer
 
 
 class EmployeesView(generics.ListCreateAPIView):
-    queryset = Employee.objects.filter(
-
-    ).exclude(
+    queryset = Employee.objects.exclude(
         is_staff=True,
         is_superuser=True
     ).order_by(
@@ -24,6 +23,14 @@ class EmployeesView(generics.ListCreateAPIView):
     @extend_schema(
         tags=["Employee"],
         summary="Get all employees",
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                type={"type": "string"},
+                description="Search parameter",
+                required=False,
+            )
+        ],
         responses={
             status.HTTP_200_OK: EmployeeSerializer(many=True),
             **SwaggerStatuses.SCHEMA_GET_POST_STATUSES,
@@ -31,6 +38,26 @@ class EmployeesView(generics.ListCreateAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        search = self.request.query_params.get('search')
+        if search:
+
+            search_vector = SearchVector(
+                'first_name',
+                'last_name',
+                'middle_name',
+                'position'
+            )
+            search_query = SearchQuery(search)
+
+            queryset = queryset.annotate(
+                search=search_vector
+            ).filter(
+                search=search_query
+            )
+
+        return queryset
 
     @extend_schema(
         tags=["Employee"],
